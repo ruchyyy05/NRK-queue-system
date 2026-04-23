@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book Appointment</title>
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+background:#f1f5f9;
+}
+
+.popup{
+position:fixed;
+inset:0;
+display:none;
+justify-content:center;
+align-items:center;
+background:rgba(0,0,0,.35);
+backdrop-filter:blur(8px);
+z-index:999;
+padding:20px;
+}
+
+.popup-box{
+width:100%;
+max-width:460px;
+background:white;
+padding:30px;
+border-radius:28px;
+box-shadow:0 20px 50px rgba(0,0,0,.12);
+}
+
+.slot{
+cursor:pointer;
+transition:.3s;
+}
+
+.slot:hover{
+transform:translateY(-8px);
+}
+
+.available{
+background:linear-gradient(135deg,#d8f8e8,#ecfff5);
+}
+
+.fast{
+background:linear-gradient(135deg,#fff2d8,#fff8e9);
+}
+
+.full{
+background:linear-gradient(135deg,#ffe2e2,#fff0f0);
+cursor:not-allowed;
+}
+
+.token{
+font-size:42px;
+font-weight:800;
+text-align:center;
+color:#7a1f3d;
+margin:14px 0;
+}
+
+.top-btns{
+text-align:center;
+margin-bottom:20px;
+}
+
+.top-btns a,
+.top-btns button{
+padding:10px 18px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+text-decoration:none;
+color:white;
+margin:5px;
+font-size:14px;
+}
+
+.home-btn{background:#2563eb;}
+.back-btn{background:#64748b;}
+.queue-btn{background:#16a34a;}
+
+select{
+width:100%;
+padding:12px;
+margin-top:12px;
+border-radius:10px;
+border:1px solid #cbd5e1;
+font-size:15px;
+}
+
+.confirm{
+width:100%;
+padding:12px;
+margin-top:14px;
+border:none;
+border-radius:10px;
+background:#2563eb;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.btn2{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+background:#e2e8f0;
+cursor:pointer;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="page fade">
+
+<div class="top">
+<div class="brand">NRK & CO HOSPITAL</div>
+
+<div class="nav-links">
+<a href="/">Home</a>
+<a href="/departments">Departments</a>
+<a href="/booking">Book</a>
+<a href="/queue">Queue</a>
+<a href="/admin">Admin</a>
+<a href="/doctors">Doctors</a>
+</div>
+</div>
+
+<h1>Book Appointment</h1>
+<p class="sub">Choose a slot, select department & doctor, confirm instantly.</p>
+
+<div class="top-btns">
+<a href="/" class="home-btn">Home</a>
+<button onclick="history.back()" class="back-btn">Back</button>
+<a href="/queue" class="queue-btn">Live Queue</a>
+</div>
+
+<div class="grid" id="slots"></div>
+
+<div class="footer">
+Smart Booking • Instant Tokens • Better Care
+</div>
+
+</div>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+<div class="popup-box" id="popupBox"></div>
+</div>
+
+<script>
+let selectedId = 0;
+
+const doctors = {
+"Cardiology":["Dr Arun","Dr Priya"],
+"Neurology":["Dr Meera","Dr Kavin"],
+"Orthopedics":["Dr Raj","Dr Naveen"],
+"Pediatrics":["Dr Sonia","Dr Asha"],
+"Dental":["Dr Hari","Dr Keerthi"],
+"ENT":["Dr Devi","Dr Rahul"]
+};
+
+function loadSlots(){
+
+fetch('/api/slots')
+.then(r=>r.json())
+.then(data=>{
+
+let html='';
+
+data.forEach(x=>{
+
+let cls="available";
+if(x[2]=="Filling Fast") cls="fast";
+if(x[2]=="Full") cls="full";
+
+html += `
+<div class="card slot ${cls}"
+${x[2]!="Full" ? `onclick="openPopup(${x[0]},'${x[1]}')"`:''}>
+
+<div class="badge">${x[2]}</div>
+<h3>${x[1]}</h3>
+<p class="sub">${x[5]}/${x[4]} booked</p>
+<p><strong>ETA:</strong> ${x[3]}</p>
+
+</div>
+`;
+
+});
+
+document.getElementById("slots").innerHTML = html;
+
+});
+
+}
+
+function openPopup(id,time){
+
+selectedId=id;
+
+document.getElementById("popup").style.display="flex";
+
+document.getElementById("popupBox").innerHTML = `
+<h2>Confirm Booking</h2>
+
+<p class="sub">Slot: ${time}</p>
+
+<select id="dept" onchange="loadDoctors()">
+<option value="">Select Department</option>
+<option>Cardiology</option>
+<option>Neurology</option>
+<option>Orthopedics</option>
+<option>Pediatrics</option>
+<option>Dental</option>
+<option>ENT</option>
+</select>
+
+<select id="doctor">
+<option value="">Select Doctor</option>
+</select>
+
+<button class="confirm" onclick="bookNow()">Book Now</button>
+<button class="btn2" onclick="closePop()">Cancel</button>
+`;
+
+}
+
+function loadDoctors(){
+
+let dept=document.getElementById("dept").value;
+let doctor=document.getElementById("doctor");
+
+doctor.innerHTML='<option value="">Select Doctor</option>';
+
+if(doctors[dept]){
+doctors[dept].forEach(x=>{
+doctor.innerHTML += `<option>${x}</option>`;
+});
+}
+
+}
+
+function closePop(){
+document.getElementById("popup").style.display="none";
+}
+
+function bookNow(){
+
+let dept=document.getElementById("dept").value;
+let doctor=document.getElementById("doctor").value;
+
+if(dept=='' || doctor==''){
+alert("Select department and doctor");
+return;
+}
+
+fetch('/api/book',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({slot_id:selectedId})
+})
+.then(r=>r.json())
+.then(data=>{
+
+if(data.success){
+
+localStorage.setItem("userToken", data.token);
+
+document.getElementById("popupBox").innerHTML = `
+<div style="text-align:center;">
+
+<div class="badge">Booking Confirmed</div>
+
+<h2>Your Token</h2>
+
+<div class="token">${data.token}</div>
+
+<p><strong>${dept}</strong></p>
+<p>${doctor}</p>
+<p>${data.time}</p>
+
+<p style="color:#16a34a;font-weight:bold;">
+Redirecting to Queue Page...
+</p>
+
+</div>
+`;
+
+setTimeout(()=>{
+window.location.href="/queue";
+},2000);
+
+}else{
+alert("Slot Full");
+location.reload();
+}
+
+});
+
+}
+
+loadSlots();
+</script>
+
+</body>
+</html>

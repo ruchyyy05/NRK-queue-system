@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login | NRK Hospital</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:linear-gradient(135deg,#0f172a,#1e293b,#2563eb);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.login-box{
+    background:#ffffff;
+    padding:40px;
+    width:380px;
+    border-radius:18px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.25);
+    text-align:center;
+}
+
+.login-box h1{
+    margin-bottom:10px;
+    color:#0f172a;
+    font-size:30px;
+}
+
+.login-box p{
+    color:#64748b;
+    margin-bottom:30px;
+}
+
+.input-group{
+    text-align:left;
+    margin-bottom:18px;
+}
+
+.input-group label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+    color:#1e293b;
+}
+
+.input-group input{
+    width:100%;
+    padding:12px;
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+    outline:none;
+    font-size:15px;
+}
+
+.input-group input:focus{
+    border-color:#2563eb;
+}
+
+button{
+    width:100%;
+    padding:13px;
+    border:none;
+    background:#2563eb;
+    color:white;
+    font-size:16px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+.note{
+    margin-top:18px;
+    font-size:13px;
+    color:#64748b;
+}
+
+.home-btn{
+    display:block;
+    margin-top:15px;
+    text-decoration:none;
+    background:#e2e8f0;
+    color:#0f172a;
+    padding:12px;
+    border-radius:10px;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.home-btn:hover{
+    background:#cbd5e1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+    <h1>NRK Hospital</h1>
+    <p>Admin Secure Login</p>
+
+    <form method="POST">
+
+        <div class="input-group">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="Enter username" required>
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter password" required>
+        </div>
+
+        <button type="submit">Login</button>
+        <a href="/" class="home-btn">← Back to Home</a>
+    </form>
+
+    <div class="note">
+        Authorized Staff Only
+    </div>
+</div>
+
+</body>
+</html>

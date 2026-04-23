@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics Dashboard | NRK Hospital</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+background:#f1f5f9;
+}
+
+.topbar{
+background:#0f172a;
+color:white;
+padding:18px 30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+}
+
+.topbar h1{
+margin:0;
+font-size:24px;
+}
+
+.btn{
+padding:10px 18px;
+border-radius:8px;
+text-decoration:none;
+color:white;
+background:#2563eb;
+font-size:14px;
+}
+
+.container{
+padding:30px;
+max-width:1100px;
+margin:auto;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+margin-bottom:25px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:14px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+text-align:center;
+}
+
+.card h2{
+margin:0;
+font-size:18px;
+color:#0f172a;
+}
+
+.card p{
+font-size:34px;
+font-weight:bold;
+color:#2563eb;
+margin-top:10px;
+}
+
+.chart-box{
+background:white;
+padding:25px;
+border-radius:14px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+<h1>NRK Hospital Analytics</h1>
+<a href="/admin" class="btn">Back to Admin</a>
+</div>
+
+<div class="container">
+
+<div class="cards">
+<div class="card">
+<h2>Total Bookings</h2>
+<p id="total">0</p>
+</div>
+</div>
+
+<div class="chart-box">
+<canvas id="chart"></canvas>
+</div>
+
+</div>
+
+<script>
+async function loadAnalytics(){
+
+let res = await fetch('/api/admin/analytics');
+let data = await res.json();
+
+document.getElementById("total").innerText = data.total;
+
+new Chart(document.getElementById("chart"),{
+type:'bar',
+data:{
+labels:data.labels,
+datasets:[{
+label:'Bookings Per Slot',
+data:data.values
+}]
+},
+options:{
+responsive:true,
+plugins:{
+legend:{display:true}
+}
+}
+});
+
+}
+
+loadAnalytics();
+</script>
+
+</body>
+</html>

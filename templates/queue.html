@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Queue | NRK Hospital</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+background:#f1f5f9;
+}
+
+.container{
+max-width:750px;
+margin:auto;
+padding:40px 20px;
+}
+
+h1{
+text-align:center;
+color:#0f172a;
+margin-bottom:25px;
+}
+
+.search-box{
+background:white;
+padding:20px;
+border-radius:16px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+margin-bottom:25px;
+text-align:center;
+}
+
+.search-box input{
+width:65%;
+padding:12px;
+border:1px solid #cbd5e1;
+border-radius:10px;
+font-size:16px;
+}
+
+.search-box button{
+padding:12px 18px;
+border:none;
+border-radius:10px;
+background:#2563eb;
+color:white;
+font-weight:bold;
+cursor:pointer;
+margin-left:8px;
+}
+
+.nav-buttons{
+text-align:center;
+margin-bottom:25px;
+}
+
+.nav-buttons a,
+.nav-buttons button{
+padding:10px 18px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+color:white;
+text-decoration:none;
+font-size:15px;
+margin:5px;
+}
+
+.home-btn{background:#2563eb;}
+.back-btn{background:#64748b;}
+.clear-btn{background:#dc2626;}
+
+.card{
+background:white;
+padding:25px;
+border-radius:16px;
+margin-bottom:20px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+text-align:center;
+}
+
+.label{
+font-size:18px;
+color:#64748b;
+}
+
+.value{
+font-size:34px;
+font-weight:bold;
+color:#2563eb;
+margin-top:10px;
+}
+
+.progress-box{
+background:#e2e8f0;
+border-radius:10px;
+height:24px;
+overflow:hidden;
+margin-top:15px;
+}
+
+.progress-fill{
+height:100%;
+width:0%;
+background:#2563eb;
+transition:0.5s;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Live Queue Status</h1>
+
+<div class="search-box">
+
+<input type="text" id="searchToken" placeholder="Enter Token (NRK-405)">
+
+<button onclick="searchToken()">Track Token</button>
+
+</div>
+
+<div class="nav-buttons">
+
+<a href="/" class="home-btn">Home</a>
+
+<button onclick="history.back()" class="back-btn">Back</button>
+
+<button onclick="clearToken()" class="clear-btn">Clear Token</button>
+
+</div>
+
+<div class="card">
+<div class="label">Now Serving</div>
+<div class="value" id="now">--</div>
+</div>
+
+<div class="card">
+<div class="label">Your Token</div>
+<div class="value" id="your">--</div>
+</div>
+
+<div class="card">
+<div class="label">People Ahead</div>
+<div class="value" id="ahead">0</div>
+</div>
+
+<div class="card">
+<div class="label">Estimated Wait</div>
+<div class="value" id="eta">0 mins</div>
+</div>
+
+<div class="card">
+<div class="label">Queue Progress</div>
+
+<div class="progress-box">
+<div class="progress-fill" id="bar"></div>
+</div>
+
+<div class="value" id="percent" style="font-size:20px;">0%</div>
+</div>
+
+</div>
+
+<script>
+async function loadQueue(){
+
+let res = await fetch('/api/queue');
+let data = await res.json();
+
+let myToken = localStorage.getItem("userToken");
+
+document.getElementById("now").innerText = data.now;
+document.getElementById("your").innerText = myToken ? myToken : "No Booking";
+document.getElementById("ahead").innerText = data.ahead;
+document.getElementById("eta").innerText = data.eta;
+
+let progress = 100 - (data.ahead * 20);
+
+if(progress < 0) progress = 0;
+if(progress > 100) progress = 100;
+
+document.getElementById("bar").style.width = progress + "%";
+document.getElementById("percent").innerText = progress + "%";
+
+if(myToken && myToken == data.now){
+alert("🔔 It's Your Turn! Please Proceed.");
+localStorage.removeItem("userToken");
+}
+
+}
+
+function clearToken(){
+localStorage.removeItem("userToken");
+location.reload();
+}
+
+function searchToken(){
+
+let token = document.getElementById("searchToken").value.trim();
+
+if(token==""){
+alert("Enter Token Number");
+return;
+}
+
+localStorage.setItem("userToken", token);
+loadQueue();
+
+alert("Tracking Token: " + token);
+
+}
+
+loadQueue();
+setInterval(loadQueue,3000);
+</script>
+
+</body>
+</html>
